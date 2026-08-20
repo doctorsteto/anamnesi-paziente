@@ -1,1 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anamnesi Familiare</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-hover: #f1f8ff;
+            --border-color: #dddddd;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        /* Contenitore con scorrimento e altezza massima */
+        .table-responsive {
+            max-height: 70vh; /* Permette lo scorrimento interno verticalmente */
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate; /* Necessario per un comportamento corretto di sticky */
+            border-spacing: 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
+        /* INTESTAZIONE FISSA (Sticky Header) */
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10; /* Assicura che l'intestazione stia sopra il contenuto delle celle */
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Sfumatura separatrice durante lo scorrimento */
+        }
+
+        th.col-rel {
+            text-align: center;
+            width: 7%;
+            min-width: 60px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: var(--bg-hover);
+        }
+
+        td.check-cell {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .actions {
+            margin-top: 25px;
+            text-align: right;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Adattamento per la stampa: mostra tutta la tabella estesa */
+        @media print {
+            .table-responsive {
+                max-height: none;
+                overflow: visible;
+                border: none;
+            }
+            th {
+                position: static;
+                color: #000;
+                background-color: #eee;
+            }
+            .actions {
+                display: none;
+            }
+            body {
+                padding: 0;
+                background: #fff;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Anamnesi Familiare</h2>
+    <p>Selezionare le patologie riscontrate nei membri della propria famiglia:</p>
+    
+    <form id="anamnesiForm">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patologia</th>
+                        <th class="col-rel">Padre</th>
+                        <th class="col-rel">Madre</th>
+                        <th class="col-rel">Figlio</th>
+                        <th class="col-rel">Figlia</th>
+                        <th class="col-rel">Fratello</th>
+                        <th class="col-rel">Sorella</th>
+                        <th class="col-rel">Nonno</th>
+                        <th class="col-rel">Nonna</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- I dati vengono generati da JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn" onclick="window.print()">Stampa / Salva PDF</button>
+            <button type="submit" class="btn" style="background-color: #27ae60;">Invia Anamnesi</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const patologie = [
+        "Tumori maligni ad alcune definite sedi delle labbra, della cavità orale e della faringe",
+        "Tumori maligni dell'esofago",
+        "Tumori maligni dello stomaco",
+        "Tumori maligni del colon",
+        "Tumori maligni del fegato e dei dotti biliari intraepatici",
+        "Tumori maligni del pancreas",
+        "Tumori maligni della laringe",
+        "Tumori maligni della trachea, dei bronchi e dei polmoni",
+        "Melanoma maligno della cute",
+        "Tumori maligni delle ossa e delle cartilagini articolari",
+        "Tumori maligni della mammella della donna",
+        "Sarcoma di Kaposi",
+        "Tumori maligni del collo dell'utero (cervice uterina)",
+        "Tumori maligni della prostata",
+        "Tumori maligni del testicolo",
+        "Tumori maligni dell'encefalo",
+        "Tumori maligni della ghiandola tiroide",
+        "Malattia di Hodgkin",
+        "Leucemia linfoide",
+        "Leucemia mieloide",
+        "Malattia di Alzheimer",
+        "Stati psicotici organici senili e presenili",
+        "Diabete mellito",
+        "Ipertensione essenziale",
+        "Cardiopatia ipertensiva",
+        "Nefropatia ipertensiva",
+        "Ipertensione secondaria",
+        "Infarto miocardico acuto",
+        "Angina pectoris",
+        "Cardiomiopatie",
+        "Aritmie cardiache",
+        "Insufficienza cardiaca (scompenso cardiaco)",
+        "Ischemia cerebrale transitoria",
+        "Morbo di Parkinson",
+        "Sclerosi multipla",
+        "Epilessie",
+        "Polmonite virale",
+        "Polmonite pneumococcica (polmonite da streptococco pneumoniae)",
+        "Bronchite cronica",
+        "Asma",
+        "Enfisema",
+        "Tubercolosi polmonare"
+    ];
+
+    const relazioni = ['padre', 'madre', 'figlio', 'figlia', 'fratello', 'sorella', 'nonno', 'nonna'];
+    const tbody = document.getElementById('tableBody');
+
+    patologie.forEach((patologia, index) => {
+        const tr = document.createElement('tr');
+        
+        const tdPatologia = document.createElement('td');
+        tdPatologia.textContent = patologia;
+        tr.appendChild(tdPatologia);
+
+        relazioni.forEach(relazione => {
+            const tdCheck = document.createElement('td');
+            tdCheck.className = 'check-cell';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = `patologia_${index}_${relazione}`;
+            checkbox.value = '1';
+            
+            tdCheck.appendChild(checkbox);
+            tr.appendChild(tdCheck);
+        });
+
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('anamnesiForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Anamnesi salvata con successo!');
+    });
+</script>
+
+</body>
+</html>
