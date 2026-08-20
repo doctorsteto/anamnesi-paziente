@@ -1,71 +1,326 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anamnesi Familiare</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-hover: #f1f8ff;
+            --border-color: #dddddd;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .table-responsive {
+            max-height: 65vh;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+        }
+
+        th.col-rel {
+            text-align: center;
+            width: 7%;
+            min-width: 60px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: var(--bg-hover);
+        }
+
+        td.check-cell {
+            text-align: center;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        /* Indicatore visivo se sono presenti dettagli aggiuntivi */
+        .check-cell.has-details::after {
+            content: '•';
+            color: var(--accent-color);
+            font-size: 24px;
+            position: absolute;
+            top: 2px;
+            right: 4px;
+        }
+
+        .actions {
+            margin-top: 25px;
+            text-align: right;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn-success { background-color: var(--success-color); }
+        .btn-danger { background-color: var(--danger-color); }
+
+        /* MODALE / POPUP */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .form-group input[type="number"] {
+            width: 60px;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .modal-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        @media print {
+            .table-responsive { max-height: none; overflow: visible; border: none; }
+            th { position: static; color: #000; background-color: #eee; }
+            .actions, .modal-overlay { display: none !important; }
+            body { padding: 0; background: #fff; }
+            .container { box-shadow: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Anamnesi Familiare</h2>
+    <p>Selezionare le patologie riscontrate nei familiari:</p>
+    
+    <form id="anamnesiForm">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patologia</th>
+                        <th class="col-rel">Padre</th>
+                        <th class="col-rel">Madre</th>
+                        <th class="col-rel">Figlio</th>
+                        <th class="col-rel">Figlia</th>
+                        <th class="col-rel">Fratello</th>
+                        <th class="col-rel">Sorella</th>
+                        <th class="col-rel">Nonno</th>
+                        <th class="col-rel">Nonna</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn" onclick="window.print()">Stampa / Salva PDF</button>
+            <button type="submit" class="btn" style="background-color: #25D366;">Invia via WhatsApp</button>
+        </div>
+    </form>
+</div>
+
+<!-- FINESTRA MODALE PER DETTAGLI PATOLOGIA -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+        <div class="modal-header" id="modalTitle">Padre : Diabete mellito</div>
+        
+        <div class="form-group">
+            <span>Patologia insorta fra i</span>
+            <input type="number" id="etaInizio" min="0" max="120">
+            <span>ed i</span>
+            <input type="number" id="etaFine" min="0" max="120">
+            <span>anni</span>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <input type="checkbox" id="causaDecesso">
+            <label for="causaDecesso">La patologia ha causato il decesso, avvenuto ad anni:</label>
+            <input type="number" id="etaDecesso" min="0" max="120" disabled>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn btn-success" id="btnConferma">✔ Conferma</button>
+            <button type="button" class="btn btn-danger" id="btnRimuovi">🗑 Rimuovi informazioni</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // INSERISCI QUI IL TUO NUMERO DI TELEFONO CON PREFISSO INTERNAZIONALE (es. 393401234567)
-    // Se lasciato vuoto, WhatsApp chiederà al paziente a chi inviare il messaggio.
-    const NUMERO_MEDICO = ""; 
+    const NUMERO_MEDICO = ""; // Inserire eventuale prefisso e numero (es. 393401234567)
 
     const patologie = [
         "Tumori maligni ad alcune definite sedi delle labbra, della cavità orale e della faringe",
-        "Tumori maligni dell'esofago",
-        "Tumori maligni dello stomaco",
-        "Tumori maligni del colon",
-        "Tumori maligni del fegato e dei dotti biliari intraepatici",
-        "Tumori maligni del pancreas",
-        "Tumori maligni della laringe",
-        "Tumori maligni della trachea, dei bronchi e dei polmoni",
-        "Melanoma maligno della cute",
-        "Tumori maligni delle ossa e delle cartilagini articolari",
-        "Tumori maligni della mammella della donna",
-        "Sarcoma di Kaposi",
-        "Tumori maligni del collo dell'utero (cervice uterina)",
-        "Tumori maligni della prostata",
-        "Tumori maligni del testicolo",
-        "Tumori maligni dell'encefalo",
-        "Tumori maligni della ghiandola tiroide",
-        "Malattia di Hodgkin",
-        "Leucemia linfoide",
-        "Leucemia mieloide",
-        "Malattia di Alzheimer",
-        "Stati psicotici organici senili e presenili",
-        "Diabete mellito",
-        "Ipertensione essenziale",
-        "Cardiopatia ipertensiva",
-        "Nefropatia ipertensiva",
-        "Ipertensione secondaria",
-        "Infarto miocardico acuto",
-        "Angina pectoris",
-        "Cardiomiopatie",
-        "Aritmie cardiache",
-        "Insufficienza cardiaca (scompenso cardiaco)",
-        "Ischemia cerebrale transitoria",
-        "Morbo di Parkinson",
-        "Sclerosi multipla",
-        "Epilessie",
-        "Polmonite virale",
-        "Polmonite pneumococcica (polmonite da streptococco pneumoniae)",
-        "Bronchite cronica",
-        "Asma",
-        "Enfisema",
-        "Tubercolosi polmonare"
+        "Tumori maligni dell'esofago", "Tumori maligni dello stomaco", "Tumori maligni del colon",
+        "Tumori maligni del fegato e dei dotti biliari intraepatici", "Tumori maligni del pancreas",
+        "Tumori maligni della laringe", "Tumori maligni della trachea, dei bronchi e dei polmoni",
+        "Melanoma maligno della cute", "Tumori maligni delle ossa e delle cartilagini articolari",
+        "Tumori maligni della mammella della donna", "Sarcoma di Kaposi",
+        "Tumori maligni del collo dell'utero (cervice uterina)", "Tumori maligni della prostata",
+        "Tumori maligni del testicolo", "Tumori maligni dell'encefalo", "Tumori maligni della ghiandola tiroide",
+        "Malattia di Hodgkin", "Leucemia linfoide", "Leucemia mieloide", "Malattia di Alzheimer",
+        "Stati psicotici organici senili e presenili", "Diabete mellito", "Ipertensione essenziale",
+        "Cardiopatia ipertensiva", "Nefropatia ipertensiva", "Ipertensione secondaria",
+        "Infarto miocardico acuto", "Angina pectoris", "Cardiomiopatie", "Aritmie cardiache",
+        "Insufficienza cardiaca (scompenso cardiaco)", "Ischemia cerebrale transitoria",
+        "Morbo di Parkinson", "Sclerosi multipla", "Epilessie", "Polmonite virale",
+        "Polmonite pneumococcica (polmonite da streptococco pneumoniae)", "Bronchite cronica",
+        "Asma", "Enfisema", "Tubercolosi polmonare"
     ];
 
-    const relazioni = ['padre', 'madre', 'figlio', 'figlia', 'fratello', 'sorella', 'nonno', 'nonna'];
+    const relazioni = ['Padre', 'Madre', 'Figlio', 'Figlia', 'Fratello', 'Sorella', 'Nonno', 'Nonna'];
+    
+    // Struttura dati per conservare le informazioni di dettaglio
+    // Chiave: "idPatologia_relazione"
+    const dettagliData = {};
+    let currentKey = null;
+    let currentCheckbox = null;
+    let currentCell = null;
+
     const tbody = document.getElementById('tableBody');
+    const modal = document.getElementById('detailModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const etaInizioInput = document.getElementById('etaInizio');
+    const etaFineInput = document.getElementById('etaFine');
+    const causaDecessoInput = document.getElementById('causaDecesso');
+    const etaDecessoInput = document.getElementById('etaDecesso');
+
+    // Abilita/Disabilita input età decesso
+    causaDecessoInput.addEventListener('change', function() {
+        etaDecessoInput.disabled = !this.checked;
+        if (!this.checked) etaDecessoInput.value = '';
+    });
 
     // Popolamento tabella
-    patologie.forEach((patologia, index) => {
+    patologie.forEach((patologia, pIdx) => {
         const tr = document.createElement('tr');
         const tdPatologia = document.createElement('td');
         tdPatologia.textContent = patologia;
         tr.appendChild(tdPatologia);
 
-        relazioni.forEach(relazione => {
+        relazioni.forEach(rel => {
             const tdCheck = document.createElement('td');
             tdCheck.className = 'check-cell';
             
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.name = `patologia_${index}_${relazione}`;
-            checkbox.value = '1';
+            const key = `${pIdx}_${rel.toLowerCase()}`;
+            checkbox.dataset.key = key;
+
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    openModal(key, patologia, rel, this, tdCheck);
+                } else {
+                    delete dettagliData[key];
+                    tdCheck.classList.remove('has-details');
+                }
+            });
             
             tdCheck.appendChild(checkbox);
             tr.appendChild(tdCheck);
@@ -74,23 +329,82 @@
         tbody.appendChild(tr);
     });
 
-    // Gestione invio WhatsApp
+    function openModal(key, patologia, relazione, checkboxEl, cellEl) {
+        currentKey = key;
+        currentCheckbox = checkboxEl;
+        currentCell = cellEl;
+
+        modalTitle.textContent = `${relazione} : ${patologia}`;
+        
+        // Popola i campi se esistono già dati salvati
+        const data = dettagliData[key] || {};
+        etaInizioInput.value = data.etaInizio || '';
+        etaFineInput.value = data.etaFine || '';
+        causaDecessoInput.checked = !!data.causaDecesso;
+        etaDecessoInput.value = data.etaDecesso || '';
+        etaDecessoInput.disabled = !causaDecessoInput.checked;
+
+        modal.style.display = 'flex';
+    }
+
+    // Tasto "Conferma" della modale
+    document.getElementById('btnConferma').addEventListener('click', function() {
+        const data = {
+            etaInizio: etaInizioInput.value,
+            etaFine: etaFineInput.value,
+            causaDecesso: causaDecessoInput.checked,
+            etaDecesso: etaDecessoInput.value
+        };
+
+        if (data.etaInizio || data.etaFine || data.causaDecesso) {
+            dettagliData[currentKey] = data;
+            currentCell.classList.add('has-details');
+        } else {
+            delete dettagliData[currentKey];
+            currentCell.classList.remove('has-details');
+        }
+
+        modal.style.display = 'none';
+    });
+
+    // Tasto "Rimuovi informazioni" della modale
+    document.getElementById('btnRimuovi').addEventListener('click', function() {
+        delete dettagliData[currentKey];
+        currentCheckbox.checked = false;
+        currentCell.classList.remove('has-details');
+        modal.style.display = 'none';
+    });
+
+    // Invio Form via WhatsApp
     document.getElementById('anamnesiForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const formData = new FormData(this);
         const selezionati = [];
 
-        patologie.forEach((patologia, index) => {
-            const parenti = [];
+        patologie.forEach((patologia, pIdx) => {
             relazioni.forEach(rel => {
-                if (formData.get(`patologia_${index}_${rel}`)) {
-                    parenti.push(rel.charAt(0).toUpperCase() + rel.slice(1));
+                const key = `${pIdx}_${rel.toLowerCase()}`;
+                const cb = document.querySelector(`input[data-key="${key}"]`);
+                
+                if (cb && cb.checked) {
+                    let riga = `• *${rel}*: ${patologia}`;
+                    const det = dettagliData[key];
+                    
+                    if (det) {
+                        const note = [];
+                        if (det.etaInizio || det.etaFine) {
+                            note.push(`insorgenza: ${det.etaInizio || '?'}-${det.etaFine || '?'} anni`);
+                        }
+                        if (det.causaDecesso) {
+                            note.push(`decesso ad anni ${det.etaDecesso || '?'}`);
+                        }
+                        if (note.length > 0) {
+                            riga += ` _(${note.join(', ')})_`;
+                        }
+                    }
+                    selezionati.push(riga);
                 }
             });
-            if (parenti.length > 0) {
-                selezionati.push(`• *${patologia}*: ${parenti.join(', ')}`);
-            }
         });
 
         if (selezionati.length === 0) {
@@ -98,22 +412,17 @@
             return;
         }
 
-        // Composizione del messaggio formattato per WhatsApp
         let messaggio = "*ANAMNESI FAMILIARE PATOLOGICA*\n\n";
         messaggio += selezionati.join('\n');
 
-        // Encoding del testo per l'URL
         const testoEncoded = encodeURIComponent(messaggio);
-        
-        // Costruzione link WhatsApp
-        let urlWhatsApp = "";
-        if (NUMERO_MEDICO.trim() !== "") {
-            urlWhatsApp = `https://wa.me/${NUMERO_MEDICO}?text=${testoEncoded}`;
-        } else {
-            urlWhatsApp = `https://wa.me/?text=${testoEncoded}`;
-        }
+        const urlWhatsApp = NUMERO_MEDICO.trim() !== "" 
+            ? `https://wa.me/${NUMERO_MEDICO}?text=${testoEncoded}`
+            : `https://wa.me/?text=${testoEncoded}`;
 
-        // Apertura in una nuova scheda o app WhatsApp
         window.open(urlWhatsApp, '_blank');
     });
 </script>
+
+</body>
+</html>
